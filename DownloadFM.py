@@ -58,7 +58,7 @@ def orderFiles(downloadPath):
                 shutil.move(file, destination)
                 countFiles["OtherFiles"] += 1
         except:
-            print("ya existe")
+            print("ya existe",file)
     makeReadMe(downloadPath, countFiles)
 
 
