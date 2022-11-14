@@ -3,7 +3,10 @@ import os, shutil
 
 
 def findFolder(rutaHome):
-    listaNames = ["Descargas", "Downloads"]
+    listaNames = [
+        "Descargas",
+        "Downloads",
+    ]
 
     # crea lista con las posibles rutas a la carpeta de descargas
     posiblesRutas = [PurePath.joinpath(rutaHome, name) for name in listaNames]
@@ -15,13 +18,16 @@ def findFolder(rutaHome):
 
 
 def orderFiles(downloadPath):
-    textExtensions = [".docx", ".doc", ".pdf", ".txt", ".xlsx", ".pptx"]
-    audioExtensions = [".mp3", ".wma", ".wav"]
-    videoExtensions = [".avi", ".mp4", ".mkv", ".wpl", ".mov"]
-    imageExtensions = [".jpeg", ".jpg", ".png", ".ico", ".gif", ".svg"]
-    windowsExtensions = [".exe", ".bin", ".msi", ".dll", ".iso"]
-    compressedExtensions = [".zip", ".rar", ".7z", ".gz"]
-    nameFolders = {
+    extensions={
+        'TextFiles':[".docx", ".doc", ".pdf", ".txt", ".xlsx", ".pptx"],
+        'AudioFiles':[".mp3", ".wma", ".wav"],
+        'VideoFiles':[".avi", ".mp4", ".mkv", ".wpl", ".mov"],
+        'ImageFiles':[".jpeg", ".jpg", ".png", ".ico", ".gif", ".svg"],
+        'ProgramFiles':[".exe", ".bin", ".msi", ".dll", ".iso"],
+        'CompressedFiles':[".zip", ".rar", ".7z", ".gz"],
+    }
+
+    countFiles = {
         "TextFiles": 0,
         "AudioFiles": 0,
         "VideoFiles": 0,
@@ -34,45 +40,27 @@ def orderFiles(downloadPath):
 
     makeFiles(downloadPath)
     # mueve los archivos duplicados y obtiene la cantidad de estos
-    nameFolders["DuplicateFiles"] = moveDuplicatefiles(downloadPath)
-    KeyFolders = list(nameFolders.keys())
+    countFiles["DuplicateFiles"] = moveDuplicatefiles(downloadPath)
 
     # analiza cada archivo de la carpeta y la almacena en su carpeta correcta
     for file in downloadPath.iterdir():
         if file.is_dir():
             continue
+
         try:
-            if file.suffix in textExtensions:
-                destination = downloadPath / KeyFolders[0]
-                shutil.move(file, destination)
-                nameFolders[KeyFolders[0]] += 1
-            elif file.suffix in audioExtensions:
-                destination = downloadPath / KeyFolders[1]
-                shutil.move(file, destination)
-                nameFolders[KeyFolders[1]] += 1
-            elif file.suffix in videoExtensions:
-                destination = downloadPath / KeyFolders[2]
-                shutil.move(file, destination)
-                nameFolders[KeyFolders[2]] += 1
-            elif file.suffix in imageExtensions:
-                destination = downloadPath / KeyFolders[3]
-                shutil.move(file, destination)
-                nameFolders[KeyFolders[3]] += 1
-            elif file.suffix in windowsExtensions:
-                destination = downloadPath / KeyFolders[4]
-                shutil.move(file, destination)
-                nameFolders[KeyFolders[4]] += 1
-            elif file.suffix in compressedExtensions:
-                destination = downloadPath / KeyFolders[5]
-                shutil.move(file, destination)
-                nameFolders[KeyFolders[5]] += 1
+            for fileName,extensionList in extensions.items():
+                if file.suffix in extensionList:
+                    destination =downloadPath / fileName
+                    shutil.move(file, destination)
+                    countFiles[fileName]+=1
+                    break
             else:
-                destination = downloadPath / KeyFolders[6]
+                destination = downloadPath / "OtherFiles"
                 shutil.move(file, destination)
-                nameFolders[KeyFolders[6]] += 1
+                countFiles["OtherFiles"]+=1
         except:
             print("ya existe")
-    makeReadMe(downloadPath, nameFolders)
+    makeReadMe(downloadPath, countFiles)
 
 
 def makeFiles(downloadPath):
@@ -105,24 +93,24 @@ def moveDuplicatefiles(downloadPath):
     return countDupliFiles
 
 
-def makeReadMe(downloadPath, nameFolders):
+def makeReadMe(downloadPath, countFiles):
     # obtenemos el nombre de usuario
     user = str(Path.home()).split(os.sep)[2]
-    readMeFile = open(downloadPath / "Readme.txt", "w")
 
-    # escribe la plantilla del contenido del archivo
-    readMeFile.write(
-        f"Hola {user} acabo de ordenar tus archivos de la carpeta '{downloadPath.stem}':\n\n"
-    )
-    readMeFile.write("\t\tDatos de las carpetas creadas\n\n")
+    with open(downloadPath/"README.txt","a") as readMeFile:
+        # escribe la plantilla del contenido del archivo
+        readMeFile.write(
+            f"Hola {user} acabo de ordenar tus archivos de la carpeta '{downloadPath.stem}':\n\n"
+        )
+        readMeFile.write("\t\tDatos de las carpetas creadas\n\n")
 
-    # escribe la cantidad de archivos por cada carpeta
-    for key,value in nameFolders.items():
-        readMeFile.write(f"La carpeta {key} contiene {value} archivos.\n")
-    readMeFile.write("\nCreado por R3-D4N")
-    readMeFile.close()
+        # escribe la cantidad de archivos por cada carpeta
+        for key, value in countFiles.items():
+            readMeFile.write(f"La carpeta {key} contiene {value} archivos.\n")
+        readMeFile.write("\nBy R3-D4N")
 
-if __name__=="__main__":
+
+if __name__ == "__main__":
     try:
         downloadPath = findFolder(Path.home())
     except FileNotFoundError:
