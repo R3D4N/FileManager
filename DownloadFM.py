@@ -18,13 +18,13 @@ def findFolder(rutaHome):
 
 
 def orderFiles(downloadPath):
-    extensions={
-        'TextFiles':[".docx", ".doc", ".pdf", ".txt", ".xlsx", ".pptx"],
-        'AudioFiles':[".mp3", ".wma", ".wav"],
-        'VideoFiles':[".avi", ".mp4", ".mkv", ".wpl", ".mov"],
-        'ImageFiles':[".jpeg", ".jpg", ".png", ".ico", ".gif", ".svg"],
-        'ProgramFiles':[".exe", ".bin", ".msi", ".dll", ".iso"],
-        'CompressedFiles':[".zip", ".rar", ".7z", ".gz"],
+    extensions = {
+        "TextFiles": [".docx", ".doc", ".pdf", ".txt", ".xlsx", ".pptx"],
+        "AudioFiles": [".mp3", ".wma", ".wav"],
+        "VideoFiles": [".avi", ".mp4", ".mkv", ".wpl", ".mov"],
+        "ImageFiles": [".jpeg", ".jpg", ".png", ".ico", ".gif", ".svg"],
+        "ProgramFiles": [".exe", ".bin", ".msi", ".dll", ".iso"],
+        "CompressedFiles": [".zip", ".rar", ".7z", ".gz"],
     }
 
     countFiles = {
@@ -46,18 +46,17 @@ def orderFiles(downloadPath):
     for file in downloadPath.iterdir():
         if file.is_dir():
             continue
-
         try:
-            for fileName,extensionList in extensions.items():
+            for fileName, extensionList in extensions.items():
                 if file.suffix in extensionList:
-                    destination =downloadPath / fileName
+                    destination = downloadPath / fileName
                     shutil.move(file, destination)
-                    countFiles[fileName]+=1
+                    countFiles[fileName] += 1
                     break
             else:
                 destination = downloadPath / "OtherFiles"
                 shutil.move(file, destination)
-                countFiles["OtherFiles"]+=1
+                countFiles["OtherFiles"] += 1
         except:
             print("ya existe")
     makeReadMe(downloadPath, countFiles)
@@ -96,8 +95,7 @@ def moveDuplicatefiles(downloadPath):
 def makeReadMe(downloadPath, countFiles):
     # obtenemos el nombre de usuario
     user = str(Path.home()).split(os.sep)[2]
-
-    with open(downloadPath/"README.txt","a") as readMeFile:
+    with open(downloadPath / "README.txt", "a") as readMeFile:
         # escribe la plantilla del contenido del archivo
         readMeFile.write(
             f"Hola {user} acabo de ordenar tus archivos de la carpeta '{downloadPath.stem}':\n\n"
