@@ -1,5 +1,5 @@
 from pathlib import Path, PurePath
-import os, shutil
+import os, shutil, re
 
 
 def findFolder(rutaHome):
@@ -80,10 +80,14 @@ def makeFiles(downloadPath):
 
 def moveDuplicatefiles(downloadPath):
     countDupliFiles = 0
-    # se plantea el patron del nombre que tendra posiblemente un archivo duplicado
-    for file in downloadPath.glob("*(*).*"):
-        nameFile, extFile = file.stem, file.suffix
-        nameFile = nameFile[:-4]
+    # filtra solo archivos, dejando las carpetas
+    for file in downloadPath.glob("*.*"):
+        nameFile,extFile=file.stem,file.suffix
+
+        # plantea el patron del nombre que tendra posiblemente un archivo duplicado
+        coincidencia=re.search(r"(\s*\(\d*\)$)|(\s{1}-\s{1}copia$)",nameFile)
+        if (coincidencia is None):
+            continue
         # verifica si realmente es un duplicado, si lo es lo envia a la carpeta DuplicateFiles
         if Path(downloadPath / f"{nameFile}{extFile}").exists():
             countDupliFiles += 1
